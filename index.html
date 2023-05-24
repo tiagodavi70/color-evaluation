@@ -1,0 +1,128 @@
+<html lang="pt-BR">
+    <meta charset="UTF-8">
+    <head>
+        <title> Color Evaluation </title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.3.0/dist/themes/light.css" />
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.3.0/dist/shoelace-autoloader.js"></script>
+
+        <link rel="stylesheet" href="style.css" />
+
+        <script src="colorscale.js" type="module"></script>
+    </head>
+    <body>
+		<!-- <categorical-colors id="line-1"></categorical-colors> -->
+		<div id="scales">
+
+		</div>
+		<div style="margin: 20px;">
+			<div>Number of colors</div>
+			<sl-input class="widget" id="number-colors" value="5"
+				type="number" placeholder="5" min="2" max="25">5</sl-input>
+			<div> Color Space</div>
+			<sl-select id="color-space" value="rgb-hex" class="widget">
+				<sl-option value="rgb">RGB</sl-option>
+				<sl-option value="rgb-hex">RGB Hex</sl-option>
+				<sl-option value="cielab">CIELab</sl-option>
+				<sl-option value="hsl">HSL</sl-option>
+			</sl-select>
+			<sl-button id="download"> Download </sl-button>
+		</div>
+		<div>
+			<div> Preview </div>
+			<div id="preview"></div>
+		</div>
+    </body>
+    <script>
+		const limits = [["#b2766f", "#9d8e48"], ["#97914b", "#529687"],["#4e9689", "#7b84a3"], ["#8484a3","#b37673"]]
+
+		function createScale(lim, size) {
+			return d3.scaleLinear()
+				.range([lim[0], lim[1]])
+				.domain([1,size+1]);
+		}
+		function interpolator(lims, index) {
+			return d3.interpolateLab(d3.lab(lims[0]), d3.lab(lims[1]))(index/10)
+		}
+
+		function getColors() {
+			let colorComplete = {};
+			let params = getWidgetValues();
+			for (let index = 1 ; index < 5 ; index++) {
+				let d = limits[index-1];
+				colorComplete[`linha${index}`] = d3.range(1, +params.colors+1).map(i => d3.interpolateLab(d3.lab(d[0]), d3.lab(d[1]))(i/10)); 
+				colorComplete[`linha${index}`] = colorComplete[`linha${index}`].map(d => colorFormat[params.color_space](d));
+			}
+			return colorComplete;
+		}
+
+		let colorFormat = {"rgb-hex": d => d3.color(d).formatHex(), "rgb": d => d3.color(d).formatHex(),
+						   "hsl": d => d3.hsl(d).formatHsl(), "cielab": d => d3.lab(d)}
+
+		function updateView(params) {
+
+			let size = +params.colors;
+			let colorSpace = params.color_space;
+			
+			d3.select("#scales").selectAll("categorical-colors")	
+				.data(limits)
+				.join("categorical-colors")
+				.attr("id", (d, i) => `line-${i+1}`)
+				.attr("width", "400")
+				.attr("colors", (d, index) => {
+					// let colors = createScale(d, size);
+					return JSON.stringify(d3.range(1, size+1).map(i => interpolator(d,i)));
+				})
+		}
+
+		function getWidgetValues() {
+			let widgets = {"colors": "5", "color_space": "rgb"};
+			Array.from(document.querySelectorAll(".widget"))
+				.forEach((d,i) => widgets[Object.keys(widgets)[i]] = d.value || widgets[Object.keys(widgets)[i]]);
+			return widgets;
+		}
+
+		function onUpdate(e, d){
+			let widgets = getWidgetValues();
+			updateView(widgets);
+			d3.select("#preview").text("\n" + JSON.stringify(getColors()))
+		};
+		
+		d3.selectAll(".widget")
+			.on("sl-input", onUpdate)
+		
+		d3.select("#download").on("click", (e,d)=> {
+			console.log(getColors());
+			downloadJson(getColors(), "colors.json");
+		});
+
+		updateView({
+			"colors": 5,
+			"color_space": "rgb"
+		});
+		d3.select("#preview").text(JSON.stringify(getColors()))
+		
+		function downloadJson(json, filename) {
+			// Convert the JSON object to a string
+			const jsonString = JSON.stringify(json, null, 2);
+			// Create a new Blob object from the JSON string
+			const blob = new Blob([jsonString], { type: "application/json" });
+		
+			// Create a download link element
+			const downloadLink = document.createElement("a");
+		
+			// Set the download link's properties
+			downloadLink.href = URL.createObjectURL(blob);
+			downloadLink.download = filename;
+		
+			// Append the download link to the document
+			document.body.appendChild(downloadLink);
+		
+			// Trigger a click event on the download link
+			downloadLink.click();
+		
+			// Clean up by removing the download link
+			document.body.removeChild(downloadLink);
+		}
+    </script> 
+</html>

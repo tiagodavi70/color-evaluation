@@ -1,0 +1,15 @@
+* {
+	font-family: var(--sl-font-sans);	
+}
+
+#scales {
+	background: linear-gradient(to right,#232526,#414345);
+	margin: 30px;
+	padding: 30px;
+	width: fit-content;
+}
+
+.widget {
+	width: 30%;
+	margin: 20px;
+}
