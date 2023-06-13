@@ -24,10 +24,6 @@ export class CategoricalColors extends LitElement {
 			${this.colors.map((c, i) =>
 				html`<div style="background-color:${c}; border: 1px solid black; width:${colorSize - this.padding}; height:${this.height - 2 * this.padding}"></div>`)
 			}</div>`
-		// html`<svg width="${this.width}" height="${this.height}">
-		//   ${this.colors.map((c,i) =>
-		//    svg`<rect x=${(i * colorSize) + this.padding} y="${this.padding}" width="${colorSize - this.padding}" height="${this.height - 2*this.padding}" style="fill:${c}"></rect>`)
-		// }</svg>`;
 	}
 }
 customElements.define('categorical-colors', CategoricalColors);

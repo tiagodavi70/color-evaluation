@@ -1,0 +1,120 @@
+<!-- <!DOCTYPE html> -->
+<html lang="pt-BR">
+    <meta charset="UTF-8">
+    <head>
+        <title> Color Evaluation </title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.3.0/dist/themes/light.css" />
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.3.0/dist/shoelace-autoloader.js"></script>
+
+		<script src="https://cdn.jsdelivr.net/npm/@shopify/draggable@1.0.0-beta.12/lib/draggable.bundle.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@shopify/draggable@1.0.0-beta.12/lib/sortable.js" type="module"></script>
+
+		<link rel="stylesheet" href="style.css" />
+
+        <script src="colorscale-dyn.js" type="module"></script>
+        <script src="input-slider.js" type="module"></script>
+		<script src="colorUtils.js"></script>
+		<script src="utils.js"></script>
+    </head>
+    <body>
+		<sl-tab-group placement="start" style="margin:1%; justify-content: center;">
+            <sl-tab slot="nav" panel="line1">Linha 1</sl-tab>
+            <sl-tab slot="nav" panel="line2">Linha 2</sl-tab>
+            <sl-tab slot="nav" panel="line3">Linha 3</sl-tab>
+            <sl-tab slot="nav" panel="line4">Linha 4</sl-tab>
+            <sl-tab slot="nav" panel="final">Final</sl-tab>
+            <sl-tab-panel name="line1" class="wrapper">
+				<categorical-dyn> </categorical-dyn>
+				<div class="next">
+					<sl-button id="next-button" class="next-button">Próximo</sl-button>
+				</div>
+			</sl-tab-panel>
+            <sl-tab-panel name="line2" class="wrapper"> 
+				<categorical-dyn> </categorical-dyn>
+				<div class="next">
+					<sl-button id="next-button" class="next-button">Próximo</sl-button>
+				</div>
+			</sl-tab-panel>
+            <sl-tab-panel name="line3" class="wrapper"> <categorical-dyn> </categorical-dyn> 
+				<div class="next">
+					<sl-button id="next-button" class="next-button">Próximo</sl-button>
+				</div>
+			</sl-tab-panel>
+            <sl-tab-panel name="line4" class="wrapper"> <categorical-dyn> </categorical-dyn>
+				<div class="next">
+					<sl-button id="next-button" class="next-button">Próximo</sl-button>
+				</div>
+			</sl-tab-panel>
+            <sl-tab-panel name="final">
+				<div style="margin: 20px; margin-top: 100px; display: block">
+					<div style="margin-bottom: 20px;">Thank you!</div>
+					<sl-button id="download"> Finish Evaluation </sl-button>
+				</div>
+			</sl-tab-panel>
+		</sl-tab-group>
+    </body>
+    <script>
+		d3.selectAll(".next-button").on("click", e => {
+			console.log("aaaa");
+			let tabGroup = document.querySelector("sl-tab-group")
+			let tabIndex = +tabGroup.activeTab.id.slice(-1);
+			console.log(tabGroup);
+			if (tabIndex < 4) {
+				tabGroup.show(`line${tabIndex+1}`)
+			} else {
+				tabGroup.show(`final`)
+			}
+		});
+
+		function formatArray(arr) {
+			let a = JSON.parse(JSON.stringify(arr));
+			let first = a[0];
+			let last = a[a.length - 1];
+			a = a.splice(1,a.length-2);
+			a = shuffle(a);
+			return [first,...a,last];
+		}
+
+		let allData = {};
+
+		function updateView(params) {
+
+			let size = +params.colors;
+			let options = {saturation_diff:0, luminance_diff:0, color_space: params.color_space, colors: size}
+			let colors = Object.values(getColors(options))
+
+			d3.select("sl-tab-group").style("margin", "10% 25%");
+
+			for (let i = 1; i <= colors.length ; i++) {
+				let startColors = formatArray(colors[i - 1]);
+				d3.select(`[name=line${i}] categorical-dyn`)
+					.attr("id", (d, i) => `line-${i+1}`)
+					.attr("width", 70 * size)
+					.attr("colors", JSON.stringify(startColors));
+			}
+		}
+
+		function getWidgetValues() {
+			let widgets = {"colors": "5", "color_space": "rgb", "saturation_diff": 0, "luminance_diff": 0};
+			Array.from(document.querySelectorAll(".widget"))
+				.forEach((d,i) => widgets[Object.keys(widgets)[i]] = d.value || widgets[Object.keys(widgets)[i]]);
+			return widgets;
+		}
+
+		function onUpdate(e, d){
+			let widgets = getWidgetValues();
+			updateView(widgets);
+			d3.select("#preview").text("\n" + JSON.stringify(getColors()))
+		};
+		
+		d3.selectAll(".widget")
+			.on("sl-input", onUpdate)
+			.on("value-change", onUpdate);
+
+		updateView({
+			"colors": 8,
+			"color_space": "rgb"
+		});
+    </script> 
+</html>
