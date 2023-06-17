@@ -36,12 +36,14 @@
 					<sl-button id="next-button" class="next-button">Próximo</sl-button>
 				</div>
 			</sl-tab-panel>
-            <sl-tab-panel name="line3" class="wrapper"> <categorical-dyn> </categorical-dyn> 
+            <sl-tab-panel name="line3" class="wrapper">
+				<categorical-dyn> </categorical-dyn> 
 				<div class="next">
 					<sl-button id="next-button" class="next-button">Próximo</sl-button>
 				</div>
 			</sl-tab-panel>
-            <sl-tab-panel name="line4" class="wrapper"> <categorical-dyn> </categorical-dyn>
+            <sl-tab-panel name="line4" class="wrapper">
+				<categorical-dyn> </categorical-dyn>
 				<div class="next">
 					<sl-button id="next-button" class="next-button">Próximo</sl-button>
 				</div>
@@ -55,17 +57,31 @@
 		</sl-tab-group>
     </body>
     <script>
+		
+		// http://127.0.0.1:5500/fm.html?colors=8
+		// http://127.0.0.1:5500/fm.html?colors=10
+		// http://127.0.0.1:5500/fm.html?colors=12
 		d3.selectAll(".next-button").on("click", e => {
-			console.log("aaaa");
 			let tabGroup = document.querySelector("sl-tab-group")
 			let tabIndex = +tabGroup.activeTab.id.slice(-1);
-			console.log(tabGroup);
 			if (tabIndex < 4) {
 				tabGroup.show(`line${tabIndex+1}`)
 			} else {
 				tabGroup.show(`final`)
 			}
 		});
+
+		let testData = {};
+		d3.select("#download").on("click", e => {
+			let scales = document.querySelectorAll("categorical-dyn");
+			for (let i = 1 ; i <= scales.length ; i++) {
+				scales[i - 1].historic;
+				testData[`line${i}`].finalColors = scales[i-1].colors;
+				testData[`line${i}`].historic = scales[i-1].historic;
+			}
+			let dt = Date.now();
+			downloadJson(testData, `test_${new Date(dt).toISOString()}.json`);
+		})
 
 		function formatArray(arr) {
 			let a = JSON.parse(JSON.stringify(arr));
@@ -76,21 +92,22 @@
 			return [first,...a,last];
 		}
 
-		let allData = {};
-
 		function updateView(params) {
-
 			let size = +params.colors;
 			let options = {saturation_diff:0, luminance_diff:0, color_space: params.color_space, colors: size}
 			let colors = Object.values(getColors(options))
 
-			d3.select("sl-tab-group").style("margin", "10% 25%");
+			d3.select("sl-tab-group").style("margin", "5% 20%");
 
 			for (let i = 1; i <= colors.length ; i++) {
 				let startColors = formatArray(colors[i - 1]);
+				testData[`line${i}`] = {};
+				testData[`line${i}`].original = colors[i - 1];
+				testData[`line${i}`].startColors = startColors;
+				testData[`line${i}`].size = params.size;
 				d3.select(`[name=line${i}] categorical-dyn`)
 					.attr("id", (d, i) => `line-${i+1}`)
-					.attr("width", 70 * size)
+					.attr("width", 60 * size)
 					.attr("colors", JSON.stringify(startColors));
 			}
 		}
@@ -112,8 +129,10 @@
 			.on("sl-input", onUpdate)
 			.on("value-change", onUpdate);
 
+		const urlParams = new URLSearchParams(window.location.search);
+		const numberColors = +urlParams.get('colors');
 		updateView({
-			"colors": 8,
+			"colors": numberColors || 8,
 			"color_space": "rgb"
 		});
     </script> 

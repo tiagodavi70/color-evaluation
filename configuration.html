@@ -53,12 +53,12 @@
 			let colorSpace = params.color_space;
 			
 			d3.select("#scales").selectAll("categorical-colors")	
-				.data(Object.values(getColors()))
+				.data(Object.values(getColors(params)))
 				.join("categorical-colors")
 				.attr("id", (d, i) => `line-${i+1}`)
 				.attr("width", 70*size)
 				.attr("colors", (d, index) => {
-					console.log(d, Object.values(getColors()), JSON.stringify(d))
+					console.log(d, Object.values(getColors(params)), JSON.stringify(d))
 					return JSON.stringify(d);
 				})
 		}
@@ -73,7 +73,7 @@
 		function onUpdate(e, d){
 			let widgets = getWidgetValues();
 			updateView(widgets);
-			d3.select("#preview").text("\n" + JSON.stringify(getColors()))
+			d3.select("#preview").text("\n" + JSON.stringify(getColors(widgets)))
 		};
 		
 		d3.selectAll(".widget")
@@ -81,13 +81,17 @@
 			.on("value-change", onUpdate);
 		
 		d3.select("#download").on("click", (e,d)=> {
-			downloadJson(getColors(), "colors.json");
+			let widgets = getWidgetValues();
+			downloadJson(getColors(widgets), "colors.json");
 		});
 
-		updateView({
+		let defaultParams = {
 			"colors": 5,
-			"color_space": "rgb"
-		});
-		d3.select("#preview").text(JSON.stringify(getColors()))		
+			"color_space": "rgb",
+			"saturation_diff": 0,
+			"luminance_diff": 0
+		};
+		updateView(defaultParams);
+		d3.select("#preview").text(JSON.stringify(getColors(defaultParams)))		
     </script> 
 </html>

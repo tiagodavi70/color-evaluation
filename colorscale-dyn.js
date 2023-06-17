@@ -6,8 +6,7 @@ export class CategoricalDynamic extends CategoricalColors {
 		.inside-button {
 			cursor: pointer;
 			text-align:center;
-			box-shadow: 0 8px 1px gray;
-			filter: drop-shadow( 0px 8px 0px rgba(0, 0, 0, .6));
+			filter: drop-shadow( 3px 8px 1px rgba(0, 0, 0, .55));
 		}
 		.unselected {
 			fill:#F8F8F8;
@@ -22,7 +21,8 @@ export class CategoricalDynamic extends CategoricalColors {
 			fill: #999
 		}
   	`;
-
+	// box-shadow: 3px 8px 1px gray;
+			
 	// static properties = {
 	// 	width: { type: Number },
 	// 	colors: { type: Object }
@@ -38,8 +38,7 @@ export class CategoricalDynamic extends CategoricalColors {
 	_swap() {
 		let a = +this.selected[0].split("-")[1];
 		let b = +this.selected[1].split("-")[1];
-		console.log(a,b);
-
+		
 		let temp = this.colors[a];
 		this.colors[a] = this.colors[b];
 		this.colors[b] = temp;
@@ -63,7 +62,7 @@ export class CategoricalDynamic extends CategoricalColors {
 					<div class="round-button">
 					${!((i == 0) || (i == this.colors.length - 1)) ? html`
 						<svg width=${sqWidth} height=${sqHeight * 1.8} fill="black" id="button-${i}" @click=${this._selected}>
-							<circle r="40%" cx="${sqWidth/2 + 1}" cy="${sqHeight / 1.2}"
+							<ellipse  rx="40%" ry="30%" cx="${sqWidth/2 + 1}" cy="${sqHeight / 1.2}"
 									stroke-width="5" stroke="#A1A1A1" class="inside-button" />
 							<text style="pointer-events: none;" stroke="black" x="${sqWidth/2 - 3}" y="${(sqHeight / 1.2) + sqHeight*.15}"> ${i} </text>
 						</svg>
