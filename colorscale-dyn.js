@@ -5,8 +5,8 @@ export class CategoricalDynamic extends CategoricalColors {
 	static styles = css`
 		.inside-button {
 			cursor: pointer;
-			text-align:center;
-			filter: drop-shadow( 3px 8px 1px rgba(0, 0, 0, .55));
+			text-align: center;
+			filter: drop-shadow( 1px 7px 0px rgba(0, 0, 0, .55));
 		}
 		.unselected {
 			fill:#F8F8F8;
@@ -91,7 +91,7 @@ export class CategoricalDynamic extends CategoricalColors {
 		if (this.eventsOff) {
 			Array.from(buttons).forEach((element) => {
 				element.addEventListener("click", (event) => {
-					console.log(!this.selected.includes(element.parentNode.id))
+					
 					if (!this.selected.includes(element.parentNode.id)) {
 						element.classList.replace("unselected", "selected");
 						this.selected.push(element.parentNode.id);

@@ -44,7 +44,6 @@ export class InputSlider extends LitElement {
 	}
 
 	render() {
-		console.log(this)
 		return html`
 		<div>${this.label}</div>
 		<div style="display: flex;">

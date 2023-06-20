@@ -1,6 +1,7 @@
 const limits = [["#b2766f", "#9d8e48"], ["#97914b", "#529687"],["#4e9689", "#7b84a3"], ["#8484a3","#b37673"]];
-let colorFormat = {"rgb-hex": d => d3.color(d).formatHex(), "rgb": d => d3.color(d).formatHex(),
-					"hsl": d => d3.hsl(d).formatHsl(), "cielab": d => d3.lab(d)};
+let colorFormat = {"rgb-hex": d => d3.color(d).formatHex(), "rgb": d => `rgb(${d3.color(d).r},${d3.color(d).g},${d3.color(d).b})`,
+					"rgb-ard": d => `${d3.color(d).r},${d3.color(d).g},${d3.color(d).b}`,
+					"hsl": d => d3.hsl(d).formatHsl(), "cielab": d => `lab(${d3.lab(d).l}% ${d3.lab(d).a} ${d3.lab(d).b})`};
 
 function createScale(lim, size) {
 	return d3.scaleLinear()

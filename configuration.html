@@ -14,9 +14,7 @@
 		<script src="colorUtils.js"></script>
     </head>
     <body>
-		<!-- <categorical-colors id="line-1"></categorical-colors> -->
 		<div id="scales">
-
 		</div>
 		<div style="margin: 20px;">
 			<div>Number of colors</div>
@@ -24,7 +22,8 @@
 				type="number" placeholder="5" min="2" max="25">5</sl-input>
 			<div> Color Space</div>
 			<div style="display:flex">
-				<sl-select id="color-space" value="rgb-hex" class="widget line">
+				<sl-select id="color-space" value="rgb-ard" class="widget line">
+					<sl-option value="rgb-ard">RGB-ARD</sl-option>
 					<sl-option value="rgb">RGB</sl-option>
 					<sl-option value="rgb-hex">RGB Hex</sl-option>
 					<sl-option value="cielab">CIELab</sl-option>
@@ -35,8 +34,6 @@
 						min="-0.4" max="0.4" step="0.01" value="0"></input-slider>
 					<input-slider class="widget" id="luminance-slider" label="Luminance Diff"
 						min="-0.25" max="0.25" step="0.01" value="0"></input-slider>
-					<!-- <input type="range" class="slider" min="-0.25" max="0.25" step="0.01" value="0" @input=${this.updateRange}></input> -->
-
 				</div>
 			</div>
 			<sl-button id="download">Download</sl-button>
@@ -58,13 +55,13 @@
 				.attr("id", (d, i) => `line-${i+1}`)
 				.attr("width", 70*size)
 				.attr("colors", (d, index) => {
-					console.log(d, Object.values(getColors(params)), JSON.stringify(d))
-					return JSON.stringify(d);
+					let c = colorSpace != "rgb-ard" ? d : d.map(c=>`rgb(${c})`);
+					return JSON.stringify(c);
 				})
 		}
 
 		function getWidgetValues() {
-			let widgets = {"colors": "5", "color_space": "rgb", "saturation_diff": 0, "luminance_diff": 0};
+			let widgets = {"colors": "5", "color_space": "rgb-ard", "saturation_diff": 0, "luminance_diff": 0};
 			Array.from(document.querySelectorAll(".widget"))
 				.forEach((d,i) => widgets[Object.keys(widgets)[i]] = d.value || widgets[Object.keys(widgets)[i]]);
 			return widgets;
@@ -73,8 +70,24 @@
 		function onUpdate(e, d){
 			let widgets = getWidgetValues();
 			updateView(widgets);
-			d3.select("#preview").text("\n" + JSON.stringify(getColors(widgets)))
+			let completeColors = formatFile();
+			d3.select("#preview").text("\n" + JSON.stringify(completeColors))
 		};
+
+		function formatFile() {
+			let widgets = getWidgetValues();
+			let colorsList = getColors(widgets);
+			let completeColors = {};
+			completeColors.lines = [];
+			for (let i = 1 ; i < 5; i++) {
+				completeColors.lines.push(colorsList[`linha${i}`]);
+			}
+			completeColors.colors = +widgets.colors;
+			completeColors.color_space = widgets.color_space;
+			completeColors.luminance_diff = +widgets.luminance_diff;
+			completeColors.saturation_diff = +widgets.saturation_diff;
+			return completeColors;
+		}
 		
 		d3.selectAll(".widget")
 			.on("sl-input", onUpdate)
@@ -82,16 +95,19 @@
 		
 		d3.select("#download").on("click", (e,d)=> {
 			let widgets = getWidgetValues();
-			downloadJson(getColors(widgets), "colors.json");
+			let completeColors = formatFile();
+			downloadJson(completeColors,
+				`colors_n_${+widgets.colors}_space_${widgets.color_space}_ldiff_${+widgets.luminance_diff}_sdiff_${+widgets.saturation_diff}.json`);
 		});
 
 		let defaultParams = {
 			"colors": 5,
-			"color_space": "rgb",
+			"color_space": "rgb-ard",
 			"saturation_diff": 0,
 			"luminance_diff": 0
 		};
 		updateView(defaultParams);
-		d3.select("#preview").text(JSON.stringify(getColors(defaultParams)))		
+		let completeColors = formatFile();
+		d3.select("#preview").text(JSON.stringify(completeColors))		
     </script> 
 </html>

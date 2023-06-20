@@ -50,17 +50,18 @@
 			</sl-tab-panel>
             <sl-tab-panel name="final">
 				<div style="margin: 20px; margin-top: 100px; display: block">
-					<div style="margin-bottom: 20px;">Thank you!</div>
-					<sl-button id="download"> Finish Evaluation </sl-button>
+					<div style="margin-bottom: 20px;">Obrigado!</div>
+					<sl-button id="download"> Encerrar avaliação </sl-button>
 				</div>
 			</sl-tab-panel>
 		</sl-tab-group>
     </body>
     <script>
 		
-		// http://127.0.0.1:5500/fm.html?colors=8
-		// http://127.0.0.1:5500/fm.html?colors=10
-		// http://127.0.0.1:5500/fm.html?colors=12
+		// http://127.0.0.1:5500/fm.html?path=colors8
+		// http://127.0.0.1:5500/fm.html?path=colors10
+		// http://127.0.0.1:5500/fm.html?path=colors12
+
 		d3.selectAll(".next-button").on("click", e => {
 			let tabGroup = document.querySelector("sl-tab-group")
 			let tabIndex = +tabGroup.activeTab.id.slice(-1);
@@ -95,9 +96,9 @@
 		function updateView(params) {
 			let size = +params.colors;
 			let options = {saturation_diff:0, luminance_diff:0, color_space: params.color_space, colors: size}
-			let colors = Object.values(getColors(options))
+			let colors = Object.values(getColors(params))
 
-			d3.select("sl-tab-group").style("margin", "5% 20%");
+			d3.select("sl-tab-group").style("margin", "10% 20%");
 
 			for (let i = 1; i <= colors.length ; i++) {
 				let startColors = formatArray(colors[i - 1]);
@@ -122,7 +123,7 @@
 		function onUpdate(e, d){
 			let widgets = getWidgetValues();
 			updateView(widgets);
-			d3.select("#preview").text("\n" + JSON.stringify(getColors()))
+			d3.select("#preview").text("\n" + JSON.stringify(getColors(widgets)))
 		};
 		
 		d3.selectAll(".widget")
@@ -130,10 +131,20 @@
 			.on("value-change", onUpdate);
 
 		const urlParams = new URLSearchParams(window.location.search);
-		const numberColors = +urlParams.get('colors');
-		updateView({
-			"colors": numberColors || 8,
-			"color_space": "rgb"
-		});
+		const path = urlParams.get('path');
+		let params = {
+			"colors": 8,
+			"color_space": "rgb",
+			"luminance_diff": 0,
+			"saturation_diff": 0
+		}
+		if (path) {
+			d3.json(`evaluations/${path}.json`).then(p => {
+				p.color_space = "rgb";
+				updateView(p);
+			});
+		} else {
+			updateView(params);
+		}
     </script> 
 </html>
