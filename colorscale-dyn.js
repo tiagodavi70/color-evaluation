@@ -33,6 +33,7 @@ export class CategoricalDynamic extends CategoricalColors {
 		this.selected = [];
 		this.eventsOff = true;
 		this.historic = [];
+		this.startTime = Date.now();
 	}
 
 	_swap() {
@@ -45,14 +46,19 @@ export class CategoricalDynamic extends CategoricalColors {
 		this.colors = JSON.parse(JSON.stringify(this.colors));
 		this.selected = [];
 		this._resetButtonColors();
-		this.historic.push(this.colors);
+		this.historic.push(this.formatToHist(this.colors));
+	}
+
+	formatToHist(a) {
+		let d = Date.now();
+		return {"timestamp": d, colors: a, "relativeTime": d - this.startTime}
 	}
 
 	render() {
 		let colorSize = ((this.width - this.padding) / this.colors.length);
 		let sqHeight = this.height - 2 * this.padding;
 		let sqWidth = colorSize - this.padding;
-		this.historic.push(this.colors);
+		this.historic.push(this.formatToHist(this.colors));
 
 		return html`<div style="display: flex;">
 			${this.colors.map((c, i) =>
